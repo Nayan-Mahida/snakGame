@@ -5,18 +5,23 @@
 #define WIDTH 60
 #define HEIGHT 30
 #define DELAY 100000
+#define snakeLength 5
 
 struct Point {
     int x, y;
 };
 
+struct Snake {
+    int x, y;
+    struct Snake *next;
+};
+
 enum Direction { LEFT, RIGHT, UP, DOWN };
 
 // Global variables
-int snakeLength;
 bool gameOver;
 enum Direction currDir;
-struct Point snake[255] = {};
+struct Snake *head;
 
 // Function prototypes
 void drawScreen();
@@ -59,9 +64,13 @@ void drawScreen() {
     }
 
     // Draw Snake
-    for (int i = 0; i < snakeLength; i++) {
-        mvaddch(snake[i].y, snake[i].x, 'O');
+    struct Snake *currBody;
+    currBody = head;
+    while (currBody != NULL) {
+        mvaddch(currBody->y, currBody->x, 'O');
+        currBody = currBody->next;
     }
+
     
     // move cursor out of the game screen; render
     move(HEIGHT + 1, 0);
@@ -78,20 +87,25 @@ void initCurses() {
 void initGame() {
     clear(); // make a clean screen
     currDir = RIGHT;
-    snakeLength = 5;
     gameOver = false;
-
+    
     // Initial snake coordinates, at middle of the game screen
-    int j = 0;
-    for (int i = 0; i < snakeLength; i++) {
-        int x = WIDTH / 2;
-        int y = HEIGHT / 2;
-        struct Point currPoint;
-        currPoint.x = x - i;
-        currPoint.y = y;
+    int x = WIDTH / 2;
+    int y = HEIGHT / 2;
 
-        snake[j++] = currPoint;
-    }
+    struct Snake *currBody;
+    currBody = (struct Snake*) malloc(sizeof(struct Snake));
+    currBody->next = NULL;
+    currBody->x = x - (snakeLength - 1);
+    currBody->y = y;
+
+    for (int i = snakeLength - 2; i >= 0; i--) {
+        head = (struct Snake*) malloc(sizeof(struct Snake));
+        head->next = currBody;
+        head->x = x - i;
+        head->y = y;
+        currBody = head;
+    }     
 }
 
 void updateDirection(int keypress) {
@@ -128,25 +142,33 @@ void updateDirection(int keypress) {
 }
 
 void shiftSnake() {
-    struct Point head = snake[0];
+    struct Snake *newHead;
+    newHead = (struct Snake*) malloc(sizeof(struct Snake));
+    newHead->next = head;
+    newHead->x = head->x;
+    newHead->y = head->y;
+    head = newHead;    
+
     switch (currDir) {
         case UP:
-            head.y--;
+            head->y--;
             break;
         case DOWN:
-            head.y++;
+            head->y++;
             break;
         case LEFT:
-            head.x--;
+            head->x--;
             break;
         case RIGHT: 
-            head.x++;
+            head->x++;
             break;
     }
 
-    for (int i = snakeLength -1; i > 0; i--) {
-        snake[i] = snake[i-1];
+    struct Snake *currBody;
+    currBody = head;
+    while (currBody->next->next != NULL) {
+        currBody = currBody->next;
     }
-
-    snake[0] = head;
+    free(currBody->next);
+    currBody->next = NULL;
 }
