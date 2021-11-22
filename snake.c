@@ -3,8 +3,8 @@
 #include <unistd.h>
 
 #define WIDTH 60
-#define HEIGHT 30
-#define DELAY 100000
+#define HEIGHT 20
+#define DELAY 200000
 #define snakeLength 5
 
 struct Snake {
@@ -36,7 +36,7 @@ int main(void) {
             initGame();
         }
         int keypress = getch();
-        flushinp(); // flush all input buffers from getch
+        // flushinp(); // flush all input buffers from getch
         updateDirection(keypress);
         shiftSnake();
         drawScreen();
