@@ -4,8 +4,12 @@
 
 #define WIDTH 60
 #define HEIGHT 20
-#define DELAY 200000
+#define DELAY 100000
 #define snakeLength 5
+
+struct Point {
+    int x, y;
+};
 
 struct Snake {
     int x, y;
@@ -31,12 +35,8 @@ int main(void) {
     initGame();
 
     while(TRUE) {
-        if (gameOver) {
-            sleep(2);
-            initGame();
-        }
         int keypress = getch();
-        // flushinp(); // flush all input buffers from getch
+        flushinp(); // flush all input buffers from getch
         updateDirection(keypress);
         shiftSnake();
         drawScreen();
@@ -164,18 +164,9 @@ void shiftSnake() {
             break;
     }
 
-    // if head collide with border, gameover
-    if (head->x >= WIDTH - 1 || head->x <= 1 || head->y >= HEIGHT - 1 || head->y <= 1) {
-        gameOver = true;
-    }
-
     struct Snake *currBody;
     currBody = head;
     while (currBody->next->next != NULL) {
-        // if collide with body, gameover
-        if (head->x == currBody->next->x && head->y == currBody->next->y) {
-            gameOver = true;
-        }
         currBody = currBody->next;
     }
     free(currBody->next);
